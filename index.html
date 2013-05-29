@@ -1,10 +1,28 @@
 <html>
 <head>
+<script src="phonegap.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
     alert('loaded');
+	
+	var db = window.openDatabase('database', 1.0', 'database', 1000000);
+	db.transaction(populateDB);
+	
+	function populateDB(tx){
+		tx.executeSql('CREATE TABLE IF NOT EXISTS TEST (id unique, data)');
+		tx.executeSql('INSERT INTO TEST (id, data) VALUES (1, "example1")');
+		tx.executeSql('INSERT INTO TEST (id, data) VALUES (2, "example2")');
+		tx.executeSql('INSERT INTO TEST (id, data) VALUES (3, "example3")');
+		tx.executeSql('SELECT * FROM TEST', [], successResult);
+	}
+	
+	function successResult(tx, results){
+		$('#results').each(function(index, item){
+			$('#results').html(item.rows[0]);
+		});
+	}
 
     var clientList = [
         'Warp',
@@ -26,6 +44,7 @@ $(document).ready(function(){
         onchange="$.ajax({url: '/new/Worknotes/strtotime/string/' + $('#finishTime-enter_time').val(),success: function(data){$('#finishTime-time').val(data);}});">
     <input type="text" name="finishTime[time]" id="finishTime-time" value="15:27:36" readonly="readonly" tabindex="-1">
 </form>
+<p id="results"></p>
 
 
 </body>
