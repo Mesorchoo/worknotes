@@ -1,0 +1,32 @@
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script type="text/javascript" language="javascript">
+$(document).ready(function(){
+    alert('loaded');
+
+    var clientList = [
+        'Warp',
+        'Other people'
+    ];
+
+    $('[name=client]').autocomplete({
+        source: clientList
+    });
+});
+</script>
+</head>
+<body>
+<h1>Worknotes</h1>
+<form method="get" action="">
+    <input type="text" name="client" value="" />
+    <input type="text" name="finishTime[date]" id="finishTime-date" value="2013-05-29" tabindex="40">
+    <input type="text" name="finishTime[enter_time]" id="finishTime-enter_time" value="" tabindex="41"
+        onchange="$.ajax({url: '/new/Worknotes/strtotime/string/' + $('#finishTime-enter_time').val(),success: function(data){$('#finishTime-time').val(data);}});">
+    <input type="text" name="finishTime[time]" id="finishTime-time" value="15:27:36" readonly="readonly" tabindex="-1">
+</form>
+
+
+</body>
+</html>
