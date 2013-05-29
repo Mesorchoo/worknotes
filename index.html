@@ -7,7 +7,7 @@
 $(document).ready(function(){
     alert('loaded');
 	
-	var db = window.openDatabase('database', 1.0', 'database', 1000000);
+	var db = window.openDatabase('database', '1.0', 'database', 1000000);
 	db.transaction(populateDB);
 	
 	function populateDB(tx){
