@@ -21,6 +21,7 @@ $(document).ready(function(){
 	
 	function successResult(tx, results){
 		alert('success');
+		alert($(results).param());
 		$(results).each(function(index, item){
 			$('#results').html($(item.rows).param());
 		});
