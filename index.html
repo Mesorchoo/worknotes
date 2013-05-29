@@ -11,6 +11,7 @@ $(document).ready(function(){
 	db.transaction(populateDB);
 	
 	function populateDB(tx){
+		alert('populating');
 		tx.executeSql('CREATE TABLE IF NOT EXISTS TEST (id unique, data)');
 		tx.executeSql('INSERT INTO TEST (id, data) VALUES (1, "example1")');
 		tx.executeSql('INSERT INTO TEST (id, data) VALUES (2, "example2")');
@@ -19,6 +20,7 @@ $(document).ready(function(){
 	}
 	
 	function successResult(tx, results){
+		alert('success');
 		$('#results').each(function(index, item){
 			$('#results').html(item.rows[0]);
 		});
