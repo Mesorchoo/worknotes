@@ -1,17 +1,80 @@
 <html>
 <head>
-<script src="phonegap.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+<style type="text/css">
+.ui-listview-filter-inset {
+    margin-top: 0;
+}
+</style>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
 <script type="text/javascript" language="javascript">
 
+// Application entry point
 document.addEventListener("deviceready", onDeviceReady, false);
 
-// Cordova is ready
-//
 function onDeviceReady() {	
-	var db = window.openDatabase('database', '1.0', 'database', 1000000);
-	db.transaction(populateDB);
+	// Load the application
+	loadApplication();	
+}
+
+function loadApplication()
+{
+	// Create the application object
+	window.application = {
+		clientsAutocomplete: []
+	};
+	// Load the database
+	application.db = window.openDatabase('database', '1.0', 'database', 1000000);
+	
+	// Start the input fields
+	$('[name=client]').autocomplete({
+		source: application.clientsAutocomplete
+	});
+	$('#loadbar').progressbar({
+      value: false
+    });
+	$(document).ajaxStart(function() {
+	  $('#loadBar').slideDown();
+	});
+	$(document).ajaxStop(function() {
+	  $('#loadBar').slideUp();
+	});
+	
+	
+	$( "#autocomplete" ).on( "listviewbeforefilter", function ( e, data ) {
+		var $ul = $( this ),
+			$input = $( data.input ),
+			value = $input.val(),
+			html = "";
+		$ul.html( "" );
+		if ( value && value.length > 2 ) {
+			$ul.html( "<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>" );
+			$ul.listview( "refresh" );
+			$.ajax({
+				url: "http://gd.geobytes.com/AutoCompleteCity",
+				dataType: "jsonp",
+				crossDomain: true,
+				data: {
+					q: $input.val()
+				}
+			})
+			.then( function ( response ) {
+				$.each( response, function ( i, val ) {
+					html += "<li>" + val + "</li>";
+				});
+				$ul.html( html );
+				$ul.listview( "refresh" );
+				$ul.trigger( "updatelayout");
+			});
+		}
+	});
+	
+
+	// Load the clientlist and start the autocompleter
+	updateClientAutocomplete();
+	
 }
 	
 
@@ -19,11 +82,9 @@ function populateDB(tx){
 	console.log('populating');
     //tx.executeSql('DROP TABLE IF EXISTS TEST');
 	tx.executeSql('CREATE TABLE IF NOT EXISTS TEST (id INTEGER PRIMARY KEY AUTOINCREMENT, data)');
-	tx.executeSql('INSERT INTO TEST (data) VALUES ("example4")');
-	tx.executeSql('INSERT INTO TEST (data) VALUES ("example5")');
-	tx.executeSql('INSERT INTO TEST (data) VALUES ("example6")');
+	//tx.executeSql('INSERT INTO TEST (data) VALUES ("example4")');
 	console.log('selecting');
-	tx.executeSql('SELECT * FROM TEST', [], successResult, failResult);
+	//tx.executeSql('SELECT * FROM TEST', [], successResult, failResult);
 }
 
 function successResult(tx, results){
@@ -38,31 +99,84 @@ function successResult(tx, results){
 	});
 }
 
+/**
+* Update the Client list
+*/
+function updateClientList()
+{
+	$.ajax({
+		url: 'clients.json',
+		cache: false,
+		success: function(data){
+			console.log(data);
+			application.db.transaction(function(tx){
+				tx.executeSql('DROP TABLE IF EXISTS CLIENTS');
+				tx.executeSql('CREATE TABLE IF NOT EXISTS CLIENTS (id INTEGER PRIMARY KEY AUTOINCREMENT, name)');
+				$(data.clients).each(function(index, item){
+					tx.executeSql('INSERT INTO CLIENTS (name) VALUES ("' +item.name+ '")');
+				});
+				// And update the autocomplete
+				updateClientAutocomplete();
+			});
+		},
+		error: function(jqXHR, status){
+			console.log('Client list update failed');
+			console.log(status);
+		}
+	});
+}
+
+function updateClientAutocomplete()
+{
+	application.db.transaction(function(tx){
+		tx.executeSql('CREATE TABLE IF NOT EXISTS CLIENTS (id INTEGER PRIMARY KEY AUTOINCREMENT, name)');
+		tx.executeSql('SELECT * FROM CLIENTS', [], function(tx, results){
+			$('#updateClientListButton').html('Update Clients ['+results.rows.length+']');
+			// Clear the autocomplete array
+			application.clientsAutocomplete = [];
+			// Loop the clients and add them to the autocomplete array
+			for(var i=0;i<results.rows.length;i++){	
+				application.clientsAutocomplete.push(results.rows.item(i).name);
+			}
+			// Apply the new autocomplete array to the client field
+			$('[name=client]').autocomplete('option', 'source', application.clientsAutocomplete);
+		});
+	});
+	// log this
+	console.log('Client autocompleter updated successfully');
+}
+
 function failResult(tx, results){
 	alert('failure');
 }
 
-var clientList = [
-	'Warp',
-	'Other people'
-];
 
-$('[name=client]').autocomplete({
-	source: clientList
-});
 </script>
 </head>
 <body>
-<div id="loadBar" style="display:none;"></div>
-<h1>Worknotes</h1>
-<form method="get" action="">
-    <input type="text" name="client" value="" />
-    <input type="text" name="finishTime[date]" id="finishTime-date" value="2013-05-29" tabindex="40">
-    <input type="text" name="finishTime[enter_time]" id="finishTime-enter_time" value="" tabindex="41"
-        onchange="$.ajax({url: '/new/Worknotes/strtotime/string/' + $('#finishTime-enter_time').val(),success: function(data){$('#finishTime-time').val(data);}});">
-    <input type="text" name="finishTime[time]" id="finishTime-time" value="15:27:36" readonly="readonly" tabindex="-1">
-</form>
-<ul id="results"></ul>
+
+<!-- Home -->
+<div data-role="page" id="page1">
+    <div data-theme="" data-role="header">
+        <h3>
+            Header
+        </h3>
+    </div>
+    <div data-role="content">
+        <div data-role="fieldcontain">
+            <label for="searchinput1">
+                Client
+            </label>
+			<form>
+            <input name="client" id="searchinput1" placeholder="client" value="" type="search">
+			
+			<h3>Cities worldwide</h3>
+			<p>After you enter <strong>at least three characters</strong> the autocomplete function will show all possible matches.</p>
+			<ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-filter-theme="d" data-filter-placeholder="client"></ul>
+			</form>
+        </div>
+    </div>
+</div>
 
 
 </body>
