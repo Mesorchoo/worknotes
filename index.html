@@ -64,6 +64,7 @@ function loadApplication()
         return false;
       },
       open: function( event, ui ){
+          alert('opening');
           $( "#searchinput1" ).autocomplete('widget').children().first().addClass('ui-first-child');
           $( "#searchinput1" ).autocomplete('widget').children().last().addClass('ui-last-child');
       }
