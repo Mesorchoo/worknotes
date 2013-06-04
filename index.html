@@ -27,6 +27,15 @@ function loadApplication()
 	window.application = {
 		clientsAutocomplete: []
 	};
+
+    alert(device.phonegap);
+    $('#stats').html('Device Name: '     + device.name     + '<br />' +
+                            'Device PhoneGap: ' + device.phonegap + '<br />' +
+                            'Device Platform: ' + device.platform + '<br />' +
+                            'Device UUID: '     + device.uuid     + '<br />' +
+                            'Device Version: '  + device.version  + '<br />');
+
+
 	// Load the database
 	application.db = window.openDatabase('database', '1.0', 'database', 1000000);
 
@@ -189,6 +198,7 @@ function failResult(tx, results){
 
 			</form>
         </div>
+        <p id="stats"></p>
     </div>
     <div data-theme="a" data-role="footer" data-position="fixed">
         <h3>
