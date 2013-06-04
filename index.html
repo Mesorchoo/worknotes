@@ -1,10 +1,12 @@
 <html>
 <head>
+<script src="phonegap.js"></script>
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
 <style type="text/css">
-.ui-listview-filter-inset {
-    margin-top: 0;
-}
+.ui-listview-filter-inset {margin-top: 0;}
+.ui-helper-hidden-accessible {display:none;}
+.autocomplete-results ul {left:0px !important;top:-13px !important;}
+.autocomplete-results li {}
 </style>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
@@ -14,9 +16,9 @@
 // Application entry point
 document.addEventListener("deviceready", onDeviceReady, false);
 
-function onDeviceReady() {	
+function onDeviceReady() {
 	// Load the application
-	loadApplication();	
+	loadApplication();
 }
 
 function loadApplication()
@@ -27,10 +29,11 @@ function loadApplication()
 	};
 	// Load the database
 	application.db = window.openDatabase('database', '1.0', 'database', 1000000);
-	
+
 	// Start the input fields
-	$('[name=client]').autocomplete({
-		source: application.clientsAutocomplete
+	$('[namaaae=client]').autocomplete({
+		source: application.clientsAutocomplete,
+        appendTo: '#client-autocomplete-results'
 	});
 	$('#loadbar').progressbar({
       value: false
@@ -41,8 +44,41 @@ function loadApplication()
 	$(document).ajaxStop(function() {
 	  $('#loadBar').slideUp();
 	});
-	
-	
+
+
+
+    $( "#searchinput1" ).autocomplete({
+      minLength: 0,
+      appendTo: '#client-autocomplete-results',
+      source: application.clientsAutocomplete,
+      focus: function( event, ui ) {
+        $( "#searchinput1" ).val( ui.item.label );
+        return false;
+      },
+      select: function( event, ui ) {
+        $( "#searchinput1" ).val( ui.item.label );
+        $( "#searchinput1-id" ).val( ui.item.value );
+        $( "#searchinput1-description" ).html( ui.item.desc );
+        $( "#searchinput1-icon" ).attr( "src", "images/" + ui.item.icon );
+
+        return false;
+      },
+      open: function( event, ui ){
+          $( "#searchinput1" ).autocomplete('widget').children().first().addClass('ui-first-child');
+          $( "#searchinput1" ).autocomplete('widget').children().last().addClass('ui-last-child');
+      }
+    }).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+      return $( "<li class=\"ui-li ui-li-static ui-btn-up-c\">" )
+        .append( "<a>" + item.label + "</a>" )
+        //.append( "<a>" + item.label + "<br>" + item.desc + "</a>" )
+        .appendTo( ul );
+    };
+    $( "#searchinput1" ).autocomplete('widget').addClass('ui-listview ui-listview-inset ui-corner-all ui-shadow');
+
+
+
+
+
 	$( "#autocomplete" ).on( "listviewbeforefilter", function ( e, data ) {
 		var $ul = $( this ),
 			$input = $( data.input ),
@@ -62,7 +98,7 @@ function loadApplication()
 			})
 			.then( function ( response ) {
 				$.each( response, function ( i, val ) {
-					html += "<li>" + val + "</li>";
+					html += "<li onclick=\"$(this).parent().html(\"\");\">" + val + "</li>";
 				});
 				$ul.html( html );
 				$ul.listview( "refresh" );
@@ -70,13 +106,13 @@ function loadApplication()
 			});
 		}
 	});
-	
+
 
 	// Load the clientlist and start the autocompleter
 	updateClientAutocomplete();
-	
+
 }
-	
+
 
 function populateDB(tx){
 	console.log('populating');
@@ -90,7 +126,7 @@ function populateDB(tx){
 function successResult(tx, results){
 	alert('success');
 	console.log('returned db rows: '+results.rows.length);
-	for(var i=0;i<results.rows.length;i++){	
+	for(var i=0;i<results.rows.length;i++){
 		$('#results').append('<li>'+results.rows.item(i).data+'</li>');
 		console.log(results.rows.item(i).data);
 	}
@@ -135,7 +171,7 @@ function updateClientAutocomplete()
 			// Clear the autocomplete array
 			application.clientsAutocomplete = [];
 			// Loop the clients and add them to the autocomplete array
-			for(var i=0;i<results.rows.length;i++){	
+			for(var i=0;i<results.rows.length;i++){
 				application.clientsAutocomplete.push(results.rows.item(i).name);
 			}
 			// Apply the new autocomplete array to the client field
@@ -159,9 +195,10 @@ function failResult(tx, results){
 <div data-role="page" id="page1">
     <div data-theme="" data-role="header">
         <h3>
-            Header
+            Worknotes
         </h3>
     </div>
+    <button onclick="updateClientList();">updateClientList</button>
     <div data-role="content">
         <div data-role="fieldcontain">
             <label for="searchinput1">
@@ -169,12 +206,18 @@ function failResult(tx, results){
             </label>
 			<form>
             <input name="client" id="searchinput1" placeholder="client" value="" type="search">
-			
+            <span id="client-autocomplete-results" class="autocomplete-results"></span>
+
 			<h3>Cities worldwide</h3>
 			<p>After you enter <strong>at least three characters</strong> the autocomplete function will show all possible matches.</p>
 			<ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-filter-theme="d" data-filter-placeholder="client"></ul>
 			</form>
         </div>
+    </div>
+    <div data-theme="a" data-role="footer" data-position="fixed">
+        <h3>
+            <a href="http://www.warp.co.nz">Warp Speed Computers</a>
+        </h3>
     </div>
 </div>
 
