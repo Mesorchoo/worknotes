@@ -51,6 +51,9 @@ function loadApplication()
       minLength: 0,
       appendTo: '#client-autocomplete-results',
       source: application.clientsAutocomplete,
+      create: function(event, ui){
+          alert('xxxxxcreated autocomplete');
+      },
       focus: function( event, ui ) {
           alert('focus');
         $( "#searchinput1" ).val( ui.item.label );
@@ -78,38 +81,6 @@ function loadApplication()
     };
     $( "#searchinput1" ).autocomplete('widget').addClass('ui-listview ui-listview-inset ui-corner-all ui-shadow');
     alert('autocomplete created');
-
-
-
-
-
-	$( "#autocomplete" ).on( "listviewbeforefilter", function ( e, data ) {
-		var $ul = $( this ),
-			$input = $( data.input ),
-			value = $input.val(),
-			html = "";
-		$ul.html( "" );
-		if ( value && value.length > 2 ) {
-			$ul.html( "<li><div class='ui-loader'><span class='ui-icon ui-icon-loading'></span></div></li>" );
-			$ul.listview( "refresh" );
-			$.ajax({
-				url: "http://gd.geobytes.com/AutoCompleteCity",
-				dataType: "jsonp",
-				crossDomain: true,
-				data: {
-					q: $input.val()
-				}
-			})
-			.then( function ( response ) {
-				$.each( response, function ( i, val ) {
-					html += "<li onclick=\"$(this).parent().html(\"\");\">" + val + "</li>";
-				});
-				$ul.html( html );
-				$ul.listview( "refresh" );
-				$ul.trigger( "updatelayout");
-			});
-		}
-	});
 
 
 	// Load the clientlist and start the autocompleter
@@ -215,9 +186,7 @@ function failResult(tx, results){
             <input name="client" id="searchinput1" placeholder="client" value="" type="search">
             <span id="client-autocomplete-results" class="autocomplete-results"></span>
 
-			<h3>Cities worldwide</h3>
-			<p>After you enter <strong>at least three characters</strong> the autocomplete function will show all possible matches.</p>
-			<ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-filter-theme="d" data-filter-placeholder="client"></ul>
+
 			</form>
         </div>
     </div>
