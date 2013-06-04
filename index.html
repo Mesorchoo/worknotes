@@ -52,10 +52,12 @@ function loadApplication()
       appendTo: '#client-autocomplete-results',
       source: application.clientsAutocomplete,
       focus: function( event, ui ) {
+          alert('focus');
         $( "#searchinput1" ).val( ui.item.label );
         return false;
       },
       select: function( event, ui ) {
+        alert('select');
         $( "#searchinput1" ).val( ui.item.label );
         $( "#searchinput1-id" ).val( ui.item.value );
         $( "#searchinput1-description" ).html( ui.item.desc );
@@ -75,6 +77,7 @@ function loadApplication()
         .appendTo( ul );
     };
     $( "#searchinput1" ).autocomplete('widget').addClass('ui-listview ui-listview-inset ui-corner-all ui-shadow');
+    alert('autocomplete created');
 
 
 
