@@ -1,6 +1,5 @@
 <html>
 <head>
-<script src="phonegap.js"></script>
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
 <style type="text/css">
 .ui-listview-filter-inset {margin-top: 0;}
@@ -14,12 +13,21 @@
 <script type="text/javascript" language="javascript">
 
 // Application entry point
-document.addEventListener("deviceready", onDeviceReady, false);
+//document.addEventListener("deviceready", onDeviceReady, false);
+function onBodyLoad(){
+    //if phonegap, need to toggle these
+     if (typeof navigator.device == "undefined"){
+          document.addEventListener("deviceready", onDeviceReady, false);
+     } else {
+     onDeviceReady();
+     }
+}
 
 function onDeviceReady() {
 	// Load the application
 	setTimeout(loadApplication(), 5000);
 }
+
 
 function loadApplication()
 {
@@ -163,20 +171,20 @@ function updateClientAutocomplete()
 			}
 			// Apply the new autocomplete array to the client field
 			$('[name=client]').autocomplete('option', 'source', application.clientsAutocomplete);
-		});
+		}, failResult);
 	});
 	// log this
 	console.log('Client autocompleter updated successfully');
 }
 
-function failResult(tx, results){
-	alert('failure');
+function failResult(err){
+	alert('failure: '+err.code);
 }
 
 
 </script>
 </head>
-<body>
+<body onload="onBodyLoad()">
 
 <!-- Home -->
 <div data-role="page" id="page1">
