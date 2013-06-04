@@ -144,6 +144,7 @@ function updateClientList()
 		url: 'clients.json',
 		cache: false,
 		success: function(data){
+            alert('successfully got new client list');
 			console.log(data);
 			application.db.transaction(function(tx){
 				tx.executeSql('DROP TABLE IF EXISTS CLIENTS');
@@ -152,10 +153,12 @@ function updateClientList()
 					tx.executeSql('INSERT INTO CLIENTS (name) VALUES ("' +item.name+ '")');
 				});
 				// And update the autocomplete
+                alert('updating the autocomplete');
 				updateClientAutocomplete();
 			});
 		},
 		error: function(jqXHR, status){
+            alert('failed to update the client list');
 			console.log('Client list update failed');
 			console.log(status);
 		}
@@ -198,7 +201,7 @@ function failResult(tx, results){
             Worknotes
         </h3>
     </div>
-    <button onclick="updateClientList();">updateClientList</button>
+    <button id="updateClientListButton" onclick="updateClientList();">updateClientList</button>
     <div data-role="content">
         <div data-role="fieldcontain">
             <label for="searchinput1">
